@@ -3,14 +3,14 @@
 --CREATE TABLES--
 CREATE TABLE Card(
   cardID NUMBER,
-  status VARCHAR2(1) CHECK ((status = 'A') OR (status = 'B')),
+  status VARCHAR2(1) CHECK ((status = 'A') OR (status = 'D')),
   fines NUMBER,
   CONSTRAINT Card_PK PRIMARY KEY (cardID));
 
 CREATE TABLE Customer(
   customerID NUMBER,
   name VARCHAR2(40),
-  customerAddress VARCHAR2(50),
+  address VARCHAR2(50),
   phone NUMBER(9),
   password VARCHAR2(20),
   userName VARCHAR2(10),
@@ -21,7 +21,7 @@ CREATE TABLE Customer(
 CREATE TABLE Employee(
   employeeID NUMBER,
   name VARCHAR2(40),
-  employeeAddress VARCHAR2(50),
+  address VARCHAR2(50),
   phone NUMBER(9),
   password VARCHAR2(20),
   userName VARCHAR2(10),
@@ -34,11 +34,9 @@ CREATE TABLE Branch(
   name VARCHAR2(40),
   address VARCHAR2(50),
   phone NUMBER(9),
-  CONSTRAINT Branch_PK PRIMARY KEY (name));
-  
-CREATE TABLE Location(
-  address VARCHAR2(50),
-  CONSTRAINT Location_PK PRIMARY KEY (address));
+  location VARCHAR2(50),
+  CONSTRAINT Branch_PK PRIMARY KEY (name)); 
+
   
 CREATE TABLE Rent(
   cardID NUMBER,
@@ -55,7 +53,7 @@ CREATE TABLE Book(
   debyCost NUMBER(10,2),
   lostCost NUMBER(10,2),
   address VARCHAR2(50),
-  CONSTRAINT Book_PK PRIMARY KEY (ISBN,bookID));
+  CONSTRAINT Book_PK PRIMARY KEY (ISBN));
 
 CREATE TABLE Video(
   title VARCHAR2(50),
@@ -74,7 +72,6 @@ SELECT * FROM Card;
 SELECT * FROM Customer;
 SELECT * FROM Employee;
 SELECT * FROM Branch;
-SELECT * FROM Location;
 SELECT * FROM Book;
 SELECT * FROM Video;
 SELECT * FROM Rent;
@@ -85,7 +82,6 @@ DROP TABLE Card;
 DROP TABLE Customer;
 DROP TABLE Employee;
 DROP TABLE Branch;
-DROP TABLE Location;
 DROP TABLE Book;
 DROP TABLE Video;
 DROP TABLE Rent;
@@ -110,17 +106,17 @@ REFERENCES Branch(name);
 ALTER TABLE Branch
 ADD CONSTRAINT Branch_FK
 FOREIGN KEY (address)
-REFERENCES Location(address);
+REFERENCES Branch(address);
 
 ALTER TABLE Book
 ADD CONSTRAINT Book_FK
 FOREIGN KEY (address)
-REFERENCES Location(address);
+REFERENCES Branch(address);
 
 ALTER TABLE Video
 ADD CONSTRAINT Video_FK
 FOREIGN KEY (address)
-REFERENCES Location(address);
+REFERENCES Branch(address);
 
 ALTER TABLE Rent
 ADD CONSTRAINT Rent_FK_Card
@@ -145,20 +141,20 @@ INSERT INTO Card VALUES (103,'A',0);
 INSERT INTO Card VALUES (104,'A',0);
 INSERT INTO Card VALUES (105,'A',0);
 INSERT INTO Card VALUES (106,'A',0);
-INSERT INTO Card VALUES (107,'B',50);
-INSERT INTO Card VALUES (108,'B',10);
-INSERT INTO Card VALUES (109,'B',25.5);
-INSERT INTO Card VALUES (110,'B',15.25);
+INSERT INTO Card VALUES (107,'D',50);
+INSERT INTO Card VALUES (108,'D',10);
+INSERT INTO Card VALUES (109,'D',25.5);
+INSERT INTO Card VALUES (110,'D',15.25);
 INSERT INTO Card VALUES (151,'A',0);
 INSERT INTO Card VALUES (152,'A',0);
 INSERT INTO Card VALUES (153,'A',0);
 INSERT INTO Card VALUES (154,'A',0);
 INSERT INTO Card VALUES (155,'A',0);
 
-INSERT INTO Branch VALUES ('ARCHEOLOGY', 'ARCHEOLOGY ROAD', 645645645);
-INSERT INTO Branch VALUES ('CHEMISTRY', 'CHEMISTRY ROAD', 622622622);
-INSERT INTO Branch VALUES ('COMPUTING', 'COMPUTING ROAD', 644644644);
-INSERT INTO Branch VALUES ('PHYSICS', 'PHYSICS ROAD', 666666666);
+INSERT INTO Branch VALUES ('ARCHEOLOGY', 'ARCHEOLOGY ROAD','ARCHEOLOGY ROAD', 645645645);
+INSERT INTO Branch VALUES ('CHEMISTRY', 'CHEMISTRY ROAD','CHEMISTRY ROAD', 622622622);
+INSERT INTO Branch VALUES ('COMPUTING', 'COMPUTING ROAD','COMPUTING ROAD', 644644644);
+INSERT INTO Branch VALUES ('PHYSICS', 'PHYSICS ROAD','PHYSICS ROAD', 666666666);
 
 INSERT INTO Customer VALUES (1, 'ALFRED', 'BACON STREET', 623623623, 'alfred123', 'al1', '12-05-2018', 101);
 INSERT INTO Customer VALUES (2, 'JAMES', 'DOWNTOWN ABBEY', 659659659, 'james123', 'ja2', '10-05-2018', 102);
@@ -176,11 +172,6 @@ INSERT INTO Employee VALUES (212, 'CHANDLER', 'OUR HEARTHS', 688688688, 'chandle
 INSERT INTO Employee VALUES (213, 'JOEY', 'LITTLE ITAYLY', 628628628, 'joey123', 'jo13', 975.75, 'ARCHEOLOGY', 553);
 INSERT INTO Employee VALUES (214, 'VICTOR', 'SANTA FE', 654321987, 'victor123', 'vic14', 2200, 'COMPUTING', 554);
 INSERT INTO Employee VALUES (215, 'JAIRO', 'ARMILLA', 698754321, 'jairo123', 'ja15', 2200.50, 'CHEMISTRY', 555);
-
-INSERT INTO Location VALUES ('ARCHEOLOGY ROAD');
-INSERT INTO Location VALUES ('CHEMISTRY ROAD');
-INSERT INTO Location VALUES ('COMPUTING ROAD');
-INSERT INTO Location VALUES ('PHYSICS ROAD');
 
 INSERT INTO Book VALUES ('A123', 'B1A123', 'GOOD', 'A', 5, 20, 'ARCHEOLOGY ROAD');
 INSERT INTO Book VALUES ('A123', 'B2A123', 'NEW', 'O', 6, 30, 'ARCHEOLOGY ROAD');
@@ -901,7 +892,7 @@ BEGIN
     auxState := &State;
     auxDebyCost := &Deby_Cost;
     auxLostCost := &Lost_Cost;
-    auxAddress := &Location;
+    auxAddress := &Branch;
     addBook_library(auxISBN, auxItemID, auxState, auxDebyCost, auxLostCost, auxAddress);
 END;
 
@@ -923,7 +914,7 @@ BEGIN
     auxState := &State;
     auxDebyCost := &Deby_Cost;
     auxLostCost := &Lost_Cost;
-    auxAddress := &Location;
+    auxAddress := &Branch;
     addVideo_library(auxTitle, auxYear, auxItemID, auxState, auxDebyCost, auxLostCost, auxAddress);
 END;
 
@@ -980,7 +971,7 @@ IS
   custoDate DATE;
   custoCard NUMBER;
 BEGIN
-  SELECT name,customeraddress,phone,username,datesignup,cardnumber
+  SELECT name,address,phone,username,datesignup,cardnumber
   INTO custoName, custoAdd, custoPhone, userNaM, custoDate, custoCard
   FROM customer
   WHERE customerid LIKE auxCustomerID;
